@@ -1,8 +1,8 @@
 # catapulta.py
 """Clase principal que contiene materiales y pasos de la catapulta."""
 from typing import List, Optional
-from material import Material
-from paso import Paso
+from .material import Material
+from .paso import Paso
 
 class Catapulta:
     def __init__(self, nombre: str = "Catapulta de cuchara") -> None:

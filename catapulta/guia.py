@@ -1,8 +1,8 @@
 # guia.py
 """Función fábrica que crea la guía de la catapulta de cuchara (Opción A)."""
-from catapulta import Catapulta
-from material import Material
-from paso import Paso
+from .catapulta import Catapulta
+from .material import Material
+from .paso import Paso
 
 def crear_guia_catapulta_cuchara() -> Catapulta:
     c = Catapulta()

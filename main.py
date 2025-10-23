@@ -1,53 +1,57 @@
 # main.py
-"""Programa principal: muestra materiales, pasos, permite marcar completados y exportar."""
-import argparse
-from guia import crear_guia_catapulta_cuchara
+"""Programa principal: muestra materiales, pasos, permite marcar completados,
+exportar y evaluar el estado de la catapulta según los materiales."""
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Guía interactiva: Catapulta de cuchara (Opción A)")
-    parser.add_argument("--export", "-e", metavar="RUTA",
-                        help="Exportar la guía a la ruta especificada (ej: guia.txt)")
-    return parser.parse_args()
+from guia import crear_guia_catapulta_cuchara
+from simulacion import evaluar_catapulta
 
 def main():
-    args = parse_args()
-    guia = crear_guia_catapulta_cuchara()
+    # 1️⃣ Crear la catapulta (instanciando la guía completa)
+    catapulta = crear_guia_catapulta_cuchara()
 
-    print(guia.listar_materiales())
-    print("\n" + "-"*60 + "\n")
-    print(guia.mostrar_pasos())
+    # 2️⃣ Mostrar materiales y pasos
+    print(catapulta.listar_materiales())
+    print("\n" + "-" * 60 + "\n")
+    print(catapulta.mostrar_pasos())
 
-    # Si se pide exportar por argumento, lo hacemos y salimos
-    if args.export:
-        ruta = guia.exportar_guia(args.export)
-        print(f"\nGuía exportada a: {ruta}")
-        return
+    # 3️⃣ Evaluar comportamiento según materiales
+    estado = evaluar_catapulta(catapulta)
 
-    # Bucle interactivo por consola
+    print("\n" + "=" * 40)
+    print("EVALUACIÓN DE LA CATAPULTA (heurística):")
+    print(f"Fuerza (0..10): {estado.fuerza}")
+    print(f"Estabilidad (0..10): {estado.estabilidad}")
+    print(f"Alcance estimado (m) para proyectiles blandos: {estado.alcance_m}")
+    print("\nDetalles:")
+    for k, v in estado.resumen.items():
+        print(f" - {k}: {v}")
+    print("\nRecomendaciones:")
+    for r in estado.recomendaciones:
+        print(f" * {r}")
+    print("=" * 40)
+
+    # 4️⃣ Bucle interactivo (opcional)
     while True:
-        entrada = input("\nIntroduce número de paso para marcar completado, 'e' para exportar la guía, 'r' para reiniciar marcas, o 'q' para salir: ").strip().lower()
-        if entrada == 'q':
+        entrada = input(
+            "\nIntroduce número de paso para marcar completado, 'e' para exportar, o 'q' para salir: "
+        ).strip().lower()
+
+        if entrada == "q":
             print("Saliendo. ¡Que te diviertas con la construcción segura!")
             break
-        elif entrada == 'e':
-            ruta = guia.exportar_guia("guia_catapulta_cuchara.txt")
+        elif entrada == "e":
+            ruta = catapulta.exportar_guia("guia_catapulta_cuchara.txt")
             print(f"Guía exportada a: {ruta}")
-        elif entrada == 'r':
-            # Reiniciar marcas
-            for p in guia.pasos:
-                p.completado = False
-            print("Todas las marcas de pasos han sido reiniciadas.")
-            print("\n" + guia.mostrar_pasos())
         else:
             try:
                 num = int(entrada)
-                if guia.marcar_paso(num):
-                    print(f"Paso {num} marcado como completado.")
-                    print("\n" + guia.mostrar_pasos())
+                if catapulta.marcar_paso(num):
+                    print(f"Paso {num} marcado como completado.\n")
+                    print(catapulta.mostrar_pasos())
                 else:
                     print(f"No existe el paso {num}.")
             except ValueError:
-                print("Entrada no válida. Introduce un número, 'e', 'r' o 'q'.")
+                print("Entrada no válida. Introduce un número, 'e' o 'q'.")
 
 if __name__ == "__main__":
     main()

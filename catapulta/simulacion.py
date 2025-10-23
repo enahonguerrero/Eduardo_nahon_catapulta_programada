@@ -16,7 +16,7 @@ class EstadoCatapulta:
 def evaluar_catapulta(cat: Catapulta) -> EstadoCatapulta:
     """Evalúa de forma heurística la catapulta según materiales presentes.
 
-    Basado en conteo y presencia de elementos, devuelve valores en 0..10.
+    Devuelve valores discretos de fuerza y estabilidad en 0..10 y un alcance estimado.
     """
     fuerza = 0
     estabilidad = 0
@@ -24,8 +24,12 @@ def evaluar_catapulta(cat: Catapulta) -> EstadoCatapulta:
 
     names = [m.nombre.lower() for m in cat.materiales]
 
-    # Fuerza: más bandas => más fuerza; cuchara presente da ventaja
-    bandas = sum(m.cantidad for m in cat.materiales if "banda" in m.nombre.lower() or "elástica" in m.nombre.lower())
+    # Conteo de bandas elásticas (busca palabras clave en el nombre)
+    bandas = sum(
+        m.cantidad
+        for m in cat.materiales
+        if "banda" in m.nombre.lower() or "elástica" in m.nombre.lower() or "elastica" in m.nombre.lower()
+    )
     if bandas >= 3:
         fuerza += 7
     elif bandas == 2:
@@ -33,6 +37,7 @@ def evaluar_catapulta(cat: Catapulta) -> EstadoCatapulta:
     elif bandas == 1:
         fuerza += 3
 
+    # Presencia de cuchara aumenta la fuerza
     if any("cuchara" in n for n in names):
         fuerza += 2
         detalles["cuchara"] = "Cuchara disponible: ayuda a sujetar proyectil"
@@ -47,13 +52,13 @@ def evaluar_catapulta(cat: Catapulta) -> EstadoCatapulta:
     if any("cinta" in n or "pegamento" in n for n in names):
         estabilidad += 2
 
-    # Clamp values 0..10
+    # Limitar valores a 0..10
     fuerza = max(0, min(10, fuerza))
     estabilidad = max(0, min(10, estabilidad))
 
     # Estimar alcance: heurística simple basada en fuerza y masa del proyectil
     masa_rel = 1.0
-    if any("algodón" in n or "pompon" in n or "blandos" in n for n in names):
+    if any("algod" in n or "pompon" in n or "blandos" in n for n in names):
         masa_rel = 0.5
     alcance_m = round((fuerza * 0.8 + estabilidad * 0.2) * (1.0 / masa_rel) * 0.5, 2)
 

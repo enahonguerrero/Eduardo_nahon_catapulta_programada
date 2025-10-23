@@ -14,6 +14,43 @@ class ResultadoLanzamiento:
 class Juego:
     def __init__(self, cat: Catapulta):
         self.cat = cat
+        self.estado = evaluar_catapulta(cat)
+
+    def lanzar(self, tension: float, angulo_deg: float) -> ResultadoLanzamiento:
+        """Simula un lanzamiento muy simplificado.
+
+        tension: 0.0..1.0
+        angulo_deg: 0..90
+        """
+        fuerza = self.estado.fuerza / 10.0
+        estabilidad = self.estado.estabilidad / 10.0
+        imprec = random.uniform(0.85, 1.15) * (1.0 - 0.3 * (1.0 - estabilidad))
+
+        import math
+        ang = math.radians(max(0, min(90, angulo_deg)))
+        alcance = fuerza * max(0.0, min(1.0, tension)) * math.sin(2 * ang) * 10.0 * imprec
+
+        # Ajuste ligero para aproximar a la estimación de la simulación
+        alcance *= (self.estado.alcance_m / max(0.1, self.estado.alcance_m))
+        distancia = round(max(0.0, alcance), 2)
+        exito = 2.0 <= distancia <= 6.0
+        return ResultadoLanzamiento(distancia_m=distancia, exito=exito)
+"""Módulo con lógica simple de juego para lanzar proyectiles con la catapulta."""
+from dataclasses import dataclass
+import random
+from .catapulta import Catapulta
+from .simulacion import evaluar_catapulta
+
+
+@dataclass
+class ResultadoLanzamiento:
+    distancia_m: float
+    exito: bool
+
+
+class Juego:
+    def __init__(self, cat: Catapulta):
+        self.cat = cat
         # Evaluación inicial
         self.estado = evaluar_catapulta(cat)
 
